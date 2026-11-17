@@ -22,9 +22,12 @@ class TestTrain(unittest.TestCase):
         #Test that we can split the data into train and test sets
         #We know that the train and test sets should add up to the same
         # length as the original data (i.e. we havn't lost anything)
-        X_train, X_test, Y_train, Y_test = splitData(self.testX, self.testY, 0.3)
+        for percentage in [0.2, 0.3, 0.5]:
+         X_train, X_test, Y_train, Y_test = splitData(self.testX, self.testY, percentage)
         self.assertEqual(len(X_train) + len(X_test), len(self.testX))
         self.assertEqual(len(Y_train) + len(Y_test), len(self.testY))
+        self.assertEqual(len(X_test), int(round(len(self.testX) * percentage)))
+        self.assertEqual(len(X_train), len(self.testX) - len(X_test))
 
     def test_buildModel(self):
         #Test the model builder returns a model of the correct type
@@ -38,8 +41,8 @@ class TestTrain(unittest.TestCase):
         model = buildModel(self.testX, self.testY)
         acc = assessModel(model, self.testX, self.testY)
         #TODO: finish these
-        # self.<FIXME>(acc, 0)
-        # self.<FIXME>(acc, 1)
+        self.assertGreaterEqual(acc, 0)
+        self.assertLessEqual(acc, 1)
 
 if __name__ == '__main__':
     unittest.main()

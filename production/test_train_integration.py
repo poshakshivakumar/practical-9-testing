@@ -2,7 +2,7 @@ import unittest
 import tempfile
 import os
 import mlflow
-from train import trainModel
+from train import trainModel, predictSafe
 from sklearn.linear_model import LogisticRegression
 
 class TestTrain(unittest.TestCase):

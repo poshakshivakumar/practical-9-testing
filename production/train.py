@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import mlflow
+from sklearn.multiclass import OneVsRestClassifier
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
@@ -23,11 +25,12 @@ def loadData(file):
 # Split the data into train and test sets
 def splitData(X, Y, percentage=0.3):
 	#Pretty straightforward, use the scikit-learn function
-	return train_test_split(X, Y, test_size=0.3)
+	return train_test_split(X, Y, test_size=percentage)
 
 def buildModel(X, Y):
 	#Create a model and fit it to the data
-	mdl = LogisticRegression(C=1/0.1, solver="liblinear")
+	mdl = LogisticRegression(C=1/0.1, solver="lbfgs", max_iter=1000)
+
 	mdl.fit(X, Y)
 	return mdl
 
@@ -48,8 +51,18 @@ def trainModel(dataFile, modelSavePath):
 	print("Accuracy", acc)
 	if modelSavePath:
 		print("Saving model to", modelSavePath)
-		mlflow.sklearn.save_model(model, modelSavePath)
+		mlflow.sklearn.save_model(
+			model,
+			modelSavePath,
+			serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE
+		)
 	return model, X_train, Y_train
+
+def predictSafe(model, features):
+	# Guard-rail against silly values
+	if features[0] > 100 or features[0] < 0 or features[1] > 100 or features[1] < 0:
+		return None
+	return model.predict([features])[0]
 
 if __name__ == "__main__":
 	argparser = argparse.ArgumentParser()
